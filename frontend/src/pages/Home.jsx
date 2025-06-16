@@ -1,15 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
-
-const imageUrls = [
-  "https://images.unsplash.com/photo-1549277513-f1b32fe1f8f5?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1549289524-06cf8837ace5?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1689016466283-2e99396646f9?q=80&w=2022&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-];
 
 const Home = () => {
   const heroRef = useRef(null);
@@ -17,6 +11,7 @@ const Home = () => {
   const ctaRef = useRef(null);
   const loaderRef = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [artworks, setArtworks] = useState([]);
 
   cardsRef.current = [];
 
@@ -99,6 +94,14 @@ const Home = () => {
       });
     });
 
+    // Fetch artworks from backend
+    fetch("http://localhost:5000/api/artworks/explore")
+      .then((res) => res.json())
+      .then((data) => {
+        setArtworks(data.slice(0, 6)); // Show top 6 featured artworks
+      })
+      .catch((err) => console.error("Failed to load featured artworks:", err));
+
     return () => ctx.revert();
   }, []);
 
@@ -120,15 +123,21 @@ const Home = () => {
             "url(https://images.unsplash.com/photo-1577084381314-cae9920e6871?q=80&w=1704&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)",
         }}
       >
-        <nav className="flex items-center justify-between px-6 py-4 bg-black bg-opacity-60 text-white shadow-md">
+        <nav className="flex items-center justify-between px-6 py-4 bg-black/40 backdrop-blur-sm z-50 text-white shadow-md">
           <div className="text-3xl font-bold tracking-wide">🎨 Artistry</div>
           <div className="space-x-4">
-            <button className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition">
+            <Link
+              to="/signin"
+              className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition"
+            >
               Login
-            </button>
-            <button className="px-4 py-2 border border-white rounded hover:bg-white hover:text-black transition">
+            </Link>
+            <Link
+              to="/signup"
+              className="px-4 py-2 border border-white rounded hover:bg-white hover:text-black transition"
+            >
               Sign Up
-            </button>
+            </Link>
           </div>
         </nav>
 
@@ -144,8 +153,9 @@ const Home = () => {
             from all the corners of the country.
           </p>
           <Link
-          to="/explore"
-           className="mt-4 px-6 py-3 bg-white text-black font-semibold rounded hover:bg-gray-200 transition">
+            to="/explore"
+            className="mt-4 px-6 py-3 bg-white text-black font-semibold rounded hover:bg-gray-200 transition"
+          >
             Explore Gallery
           </Link>
         </section>
@@ -156,29 +166,50 @@ const Home = () => {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-            {imageUrls.map((url, i) => (
-              <div
-                key={i}
-                ref={(el) => (cardsRef.current[i] = el)}
-                className="rounded-lg overflow-hidden bg-white shadow-xl hover:shadow-2xl transition transform hover:scale-105"
-              >
-                <img
-                  src={url}
-                  alt={`Artwork ${i + 1}`}
-                  className="w-full h-64 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="text-xl font-bold mb-2">
-                    Artwork Title {i + 1}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    A bold expression captured in every brush stroke.
-                  </p>
+            {artworks.length > 0 ? (
+              artworks.map((art, i) => {
+                return(
+                <div
+                  key={art._id}
+                  ref={(el) => (cardsRef.current[i] = el)}
+                  className="rounded-lg overflow-hidden bg-white shadow-xl hover:shadow-2xl transition transform hover:scale-105"
+                >
+                  <img
+                    src={`http://localhost:5000${encodeURI(art.imageUrl)}`}
+                    alt={art.title}
+                    className="w-full h-64 object-cover"
+                  />
+                  <div className="p-4">
+                    <h3 className="text-xl font-bold mb-2">{art.title}</h3>
+                    <p className="text-sm text-gray-600 truncate">
+                      {art.description}
+                    </p>
+                    <p className="text-md font-semibold mt-2">
+                      Rs. {art.price}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+                );
+              })
+            ) : (
+              <p className="col-span-full text-center text-gray-600">
+                No featured artworks available.
+              </p>
+            )}
+          </div>
+
+          {/* View All button */}
+          <div className="flex justify-center mt-12">
+            <Link
+              to="/explore"
+              className="px-6 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition"
+            >
+              View All Artworks
+            </Link>
           </div>
         </section>
+
+        {/* rest of your page unchanged */}
 
         <section
           className="relative px-6 py-20 text-white min-h-[80vh]"
@@ -255,9 +286,12 @@ const Home = () => {
               Join our platform and showcase your talent to art lovers across
               the globe.
             </p>
-            <button className="px-6 py-3 bg-white text-black font-semibold rounded hover:bg-gray-300 transition">
+            <Link
+              to="signup"
+              className="px-6 py-3 bg-white text-black font-semibold rounded hover:bg-gray-300 transition"
+            >
               Become a Seller
-            </button>
+            </Link>
           </div>
         </section>
 

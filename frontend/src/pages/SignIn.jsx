@@ -1,75 +1,192 @@
-import React from 'react'
-import { useState } from "react";
-import { motion } from "framer-motion";
-import background from '../images/background.jpg'
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import background from "../images/background.jpg";
 
 export const SignIn = () => {
-    const [isSeller, setIsSeller] = useState(true);
+  const [isSeller, setIsSeller] = useState(true);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-    return (
-      <div
-        className="min-h-screen flex flex-col items-center justify-center bg-cover bg-center"
-        style={{ backgroundImage: `url(${background})`}} // Replace with your image
-      >
-        {/* Toggle Headers */}
-        <div className="flex gap-6 mb-6">
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // for cookies if using sessions
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem("token", data.token); // Optional: store JWT
+        if (data.user.role === "seller") {
+          navigate("/sellerdashboard");
+        } else {
+          navigate("/buyer-dashboard");
+        }
+      } else {
+        setError(data.message || "Login failed");
+      }
+    } catch (err) {
+      setError("Server error. Please try again.");
+    }
+  };
+
+  return (
+    <div
+      className="min-h-screen flex flex-col items-center justify-center bg-cover bg-center relative overflow-hidden"
+      style={{ backgroundImage: `url(${background})` }}
+    >
+      {/* Background glow */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-br from-purple-600/30 via-pink-500/20 to-indigo-600/30"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.4 }}
+        transition={{ duration: 2 }}
+      />
+<div className="absolute top-0 left-0 w-full bg-black/40 backdrop-blur-sm z-50">
+  <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <a
+      href="/"
+      className="text-white text-2xl font-bold hover:text-purple-300 transition"
+    >
+      🎨 ArtVerse
+    </a>
+    <a
+      href="/"
+      className="text-white font-medium hover:text-purple-300 transition"
+    >
+      Home
+    </a>
+  </div>
+  </div>
+        {/* Toggle Buttons */}
+        <motion.div
+          className="flex gap-6 mb-8 z-10"
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
           <button
             onClick={() => setIsSeller(true)}
-            className={`text-xl font-semibold px-4 py-2 rounded-lg transition ${
-              isSeller ? "text-white bg-purple-600" : "text-gray-300"
+            className={`text-xl font-semibold px-6 py-3 rounded-full backdrop-blur-lg transition duration-300 ${
+              isSeller
+                ? "text-white bg-purple-700 shadow-xl"
+                : "text-gray-200 hover:text-white hover:bg-purple-500/30"
             }`}
           >
             For Seller
           </button>
           <button
             onClick={() => setIsSeller(false)}
-            className={`text-xl font-semibold px-4 py-2 rounded-lg transition ${
-              !isSeller ? "text-white bg-purple-600" : "text-gray-300"
+            className={`text-xl font-semibold px-6 py-3 rounded-full backdrop-blur-lg transition duration-300 ${
+              !isSeller
+                ? "text-white bg-purple-700 shadow-xl"
+                : "text-gray-200 hover:text-white hover:bg-purple-500/30"
             }`}
           >
             For Buyer
           </button>
-        </div>
-
-        {/* Form Container */}
-        <motion.div
-          key={isSeller ? "seller" : "buyer"}
-          initial={{ x: isSeller ? -100 : 100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: isSeller ? 100 : -100, opacity: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-white/10 backdrop-blur-lg p-8 rounded-2xl border border-white/40 shadow-lg max-w-sm w-full"
-        >
-          <h2 className="text-white text-2xl font-semibold text-center mb-6">
-            {isSeller ? "Seller Sign In" : "Buyer Sign In"}
-          </h2>
-          <form className="space-y-4">
-            <div>
-              <label className="block text-xl font-bold text-white/80">Email</label>
-              <input
-                type="email"
-                className="w-full p-3 mt-1 rounded-lg bg-white/20 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/50"
-                placeholder="Enter your email"
-              />
-            </div>
-            <div>
-              <label className="block text-xl font-bold text-white/80">Password</label>
-              <input
-                type="password"
-                className="w-full p-3 mt-1 rounded-lg bg-white/20 text-white placeholder-white/60 outline-none focus:ring-2 focus:ring-white/50"
-                placeholder="Enter your password"
-              />
-            </div>
-            <button className="w-full bg-white/20 text-white py-3 rounded-lg hover:bg-gray-800/30 transition">
-              Sign In
-            </button>
-          </form>
-          <p className="text-white/70 text-center mt-4">
-            Don't have an account? <a href="signup" className="underline">Sign up</a>
-          </p>
         </motion.div>
-      </div>
-    );
-}
 
-export default SignIn
+        {/* Login Form */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={isSeller ? "seller" : "buyer"}
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -40, scale: 0.95 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="bg-white/10 backdrop-blur-xl p-10 rounded-3xl border border-white/30 shadow-2xl w-full max-w-md z-10"
+          >
+            <motion.h2
+              className="text-white text-3xl font-extrabold text-center mb-6"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              {isSeller ? "Seller Sign In" : "Buyer Sign In"}
+            </motion.h2>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <label className="block text-lg font-medium text-white/80 mb-1">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-white/20 text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-white/40 transition"
+                  placeholder="Enter your username"
+                  required
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <label className="block text-lg font-medium text-white/80 mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-white/20 text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-white/40 transition"
+                  placeholder="Enter your password"
+                  required
+                />
+              </motion.div>
+
+              {error && (
+                <motion.p
+                  className="text-red-300 text-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  {error}
+                </motion.p>
+              )}
+
+              <motion.button
+                type="submit"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+                className="w-full bg-white/20 text-white py-3 rounded-xl hover:bg-purple-600/40 transition shadow-md mt-2"
+              >
+                Sign In
+              </motion.button>
+            </form>
+
+            <motion.p
+              className="text-white/70 text-center mt-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              Don’t have an account?{" "}
+              <a href="/signup" className="underline hover:text-white">
+                Sign up
+              </a>
+            </motion.p>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+  );
+};
+
+export default SignIn;
