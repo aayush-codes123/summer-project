@@ -1,60 +1,81 @@
 import React, { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
+import { useNavigate } from "react-router-dom";
 
-const artworks = [
-  {
-    id: 1,
-    name: "Sunset Bliss",
-    shortDesc: "A vibrant sunset captured on canvas.",
-    fullDesc:
-      "Sunset Bliss is a beautiful expression of nature's end-of-day colors, blending warm reds and oranges with cool purples.",
-    price: "$350",
-    artist: "Alice Monroe",
-    image:
-      "https://images.unsplash.com/photo-1549277513-f1b32fe1f8f5?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    id: 2,
-    name: "Mountain Majesty",
-    shortDesc: "The grandeur of towering peaks.",
-    fullDesc:
-      "Mountain Majesty captures the rugged beauty and serene calmness of mountain landscapes, evoking a sense of awe.",
-    price: "$500",
-    artist: "James Carter",
-    image:
-      "https://images.unsplash.com/photo-1549289524-06cf8837ace5?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    id: 3,
-    name: "Ocean Whispers",
-    shortDesc: "Gentle waves and endless horizons.",
-    fullDesc:
-      "Ocean Whispers is an ode to the calm and mystery of the sea, painted with delicate blues and whites.",
-    price: "$420",
-    artist: "Sophia Lee",
-    image:
-      "https://images.unsplash.com/photo-1689016466283-2e99396646f9?q=80&w=800&auto=format&fit=crop",
-  },
-  // Add more artworks as needed
-];
-
-const Navbar = () => (
+const Navbar = ({ userName }) => (
   <nav className="flex items-center justify-between px-6 py-4 bg-black bg-opacity-80 text-white shadow-md fixed w-full top-0 z-50">
-    <div className="text-3xl font-bold tracking-wide">🎨 Artistry</div>
+    <div className="flex items-center space-x-4">
+      <div className="text-3xl font-bold tracking-wide">🎨 Artistry</div>
+      {userName && (
+        <div className="text-lg font-semibold ml-6">Welcome, {userName}</div>
+      )}
+    </div>
     <div className="space-x-4">
-      <button className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition">
-        Login
-      </button>
-      <button className="px-4 py-2 border border-white rounded hover:bg-white hover:text-black transition">
-        Sign Up
-      </button>
+      {!userName ? (
+        <>
+          <button
+            onClick={() => (window.location.href = "/signin")}
+            className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition"
+          >
+            Login
+          </button>
+          <button
+            onClick={() => (window.location.href = "/signup")}
+            className="px-4 py-2 border border-white rounded hover:bg-white hover:text-black transition"
+          >
+            Sign Up
+          </button>
+        </>
+      ) : (
+        <button
+          onClick={() => {
+            localStorage.removeItem("token");
+            window.location.href = "/signin";
+          }}
+          className="px-4 py-2 bg-red-600 rounded hover:bg-red-700 transition"
+        >
+          Logout
+        </button>
+      )}
     </div>
   </nav>
 );
 
 const ExploreMore = () => {
+  const [artworks, setArtworks] = useState([]);
   const [selectedArt, setSelectedArt] = useState(null);
+  const [userName, setUserName] = useState(null);
   const modalRef = useRef(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch artworks from backend
+    fetch("http://localhost:5000/api/artworks/explore")
+      .then((res) => res.json())
+      .then((data) => {
+        setArtworks(data);
+      })
+      .catch((err) => console.error("Fetch artworks error:", err));
+
+    // Check if user is logged in, get username from backend or decode token
+    const token = localStorage.getItem("token");
+    if (token) {
+      // Example: decode token or call backend to get username
+      // Here, assuming backend provides a user info endpoint
+      fetch("http://localhost:5000/api/seller/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Unauthorized");
+          return res.json();
+        })
+        .then((userData) => setUserName(userData.name))
+        .catch(() => {
+          localStorage.removeItem("token");
+          setUserName(null);
+        });
+    }
+  }, []);
 
   useEffect(() => {
     if (selectedArt) {
@@ -76,28 +97,37 @@ const ExploreMore = () => {
     });
   };
 
+  const handleBuy = () => {
+    if (!userName) {
+      alert("Please login to buy artwork.");
+      navigate("/signin");
+      return;
+    }
+    alert(`Buying "${selectedArt.name}" - feature coming soon!`);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 pt-20 pb-12 px-6">
-      <Navbar />
+    <div className="min-h-screen bg-gray-100 pt-20 pb-12 px-0">
+      <Navbar userName={userName} />
 
       <h1 className="text-4xl font-bold text-center mb-12">Explore More Artworks</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
         {artworks.map((art) => (
           <div
-            key={art.id}
+            key={art._id}
             className="bg-white rounded-lg shadow-lg cursor-pointer overflow-hidden hover:shadow-2xl transition transform hover:scale-105"
             onClick={() => setSelectedArt(art)}
           >
             <img
-              src={art.image}
-              alt={art.name}
+              src={`http://localhost:5000${art.imageUrl}`}
+              alt={art.title}
               className="w-full h-48 object-cover"
               loading="lazy"
             />
             <div className="p-4">
-              <h3 className="text-xl font-semibold">{art.name}</h3>
-              <p className="text-gray-600 mt-1">{art.shortDesc}</p>
+              <h3 className="text-xl font-semibold">{art.title}</h3>
+              <p className="text-gray-600 mt-1">{art.description}</p>
             </div>
           </div>
         ))}
@@ -112,7 +142,7 @@ const ExploreMore = () => {
           <div
             ref={modalRef}
             className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto relative"
-            onClick={(e) => e.stopPropagation()} // prevent modal close when clicking inside
+            onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={closeModal}
@@ -122,17 +152,25 @@ const ExploreMore = () => {
               &times;
             </button>
             <img
-              src={selectedArt.image}
-              alt={selectedArt.name}
+              src={`http://localhost:5000${selectedArt.imageUrl}`}
+              alt={selectedArt.title}
               className="w-full h-64 object-cover rounded-t-xl"
             />
             <div className="p-6">
-              <h2 className="text-3xl font-bold mb-2">{selectedArt.name}</h2>
-              <p className="text-gray-700 mb-4">{selectedArt.fullDesc}</p>
+              <h2 className="text-3xl font-bold mb-2">{selectedArt.title}</h2>
+              <p className="text-gray-700 mb-4">{selectedArt.description}</p>
               <p className="text-lg font-semibold mb-2">
-                Price: <span className="text-indigo-600">{selectedArt.price}</span>
+                Price: <span className="text-indigo-600">Rs. {selectedArt.price}</span>
               </p>
-              <p className="text-gray-800">Artist: <span className="font-medium">{selectedArt.artist}</span></p>
+              <p className="text-gray-800">
+                Artist: <span className="font-medium">{selectedArt.sellerName || "Unknown"}</span>
+              </p>
+              <button
+                onClick={handleBuy}
+                className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
+              >
+                Buy
+              </button>
             </div>
           </div>
         </div>
