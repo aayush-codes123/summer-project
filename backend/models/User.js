@@ -7,8 +7,9 @@ const userSchema = new mongoose.Schema({
   password: String,
   phoneNumber: String,
   address: String,
-  artStyle: String, // Only for sellers
-  role: { type: String, enum: ["buyer", "seller", "admin"], default: "buyer" }
+  artStyle: { type: String }, // seller only
+  age: { type: Number },       // buyer only
+  role: { type: String, enum: ["buyer", "seller", "admin"], default: "buyer" },
 });
 
 module.exports = mongoose.model("User", userSchema);

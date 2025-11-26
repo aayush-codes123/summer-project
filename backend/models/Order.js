@@ -7,6 +7,9 @@ const orderSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  buyerName: { type: String, required: true },
+  shippingAddress: { type: String, required: true },
+  contactNumber: { type: String, required: true },
   artwork: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Artwork",

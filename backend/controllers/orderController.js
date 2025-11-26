@@ -3,45 +3,44 @@ const Order = require("../models/Order");
 const Artwork = require("../models/Artwork");
 const User = require("../models/User");
 const axios = require("axios");
+const { sendOrderConfirmation } = require("../utils/emailService");
 
 exports.placeOrder = async (req, res) => {
-  const { artworkId, amount, token } = req.body;
+  const { artworkId, amount, buyerName, shippingAddress, contactNumber } = req.body;
   const userId = req.user.id;
 
   try {
-    // Verify payment with Khalti
-    const response = await axios.post(
-      "https://khalti.com/api/v2/payment/verify/",
-      {
-        token,
-        amount: amount * 100, // in paisa
-      },
-      {
-        headers: {
-          Authorization: `Key YOUR_KHALTI_SECRET_KEY`, // Replace this!
-        },
-      }
-    );
+    // For now, skip Khalti verification and just save the order as Pending
+    // In future, integrate payment gateway here
 
-    if (response.data.idx) {
-      // Payment success - store order
-      const newOrder = await Order.create({
-        buyer: userId,
-        artwork: artworkId,
-        amount,
-        transactionId: response.data.idx,
-        paymentStatus: "Paid",
-      });
+    const newOrder = await Order.create({
+      buyer: userId,
+      buyerName,
+      shippingAddress,
+      contactNumber,
+      artwork: artworkId,
+      amount,
+      paymentStatus: "Paid", // Assuming payment is done on frontend for now
+    });
 
-      // Send email later here...
+    // Fetch artwork details for email
+    const artwork = await Artwork.findById(artworkId);
 
-      return res.status(201).json({ message: "Order placed!", order: newOrder });
-    } else {
-      return res.status(400).json({ message: "Payment verification failed" });
-    }
+    // Send Confirmation Email
+    const buyerEmail = req.user.email; // Assuming user email is in req.user
+    await sendOrderConfirmation(buyerEmail, {
+      buyerName,
+      artworkTitle: artwork.title,
+      amount,
+      orderId: newOrder._id,
+      shippingAddress
+    });
+
+    return res.status(201).json({ message: "Order placed successfully!", order: newOrder });
+
   } catch (err) {
-    console.error("Khalti verification failed", err);
-    return res.status(500).json({ message: "Payment failed", error: err.message });
+    console.error("Order placement failed", err);
+    return res.status(500).json({ message: "Order placement failed", error: err.message });
   }
 };
 

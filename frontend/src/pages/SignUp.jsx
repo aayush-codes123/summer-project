@@ -38,9 +38,10 @@ export const SignUp = () => {
       email: formData.email,
       password: formData.password,
       address: formData.address,
-      phone: formData.phone,
+      phoneNumber: formData.phone,
       role: isSeller ? "seller" : "buyer",
       ...(isSeller && { artStyle: formData.category }),
+      ...(!isSeller && { age: parseInt(formData.age) }),
     };
 
     try {
@@ -83,7 +84,7 @@ export const SignUp = () => {
             href="/"
             className="text-white text-2xl font-bold hover:text-purple-300 transition"
           >
-            🎨 ArtVerse
+            🎨 Musemarket
           </a>
           <a
             href="/"
@@ -248,11 +249,11 @@ export const SignUp = () => {
                         onChange={handleChange}
                         className="w-full p-3 mt-1 rounded-xl bg-white/20 text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-white/40 transition"
                       >
-                        <option value="Sketches">Sketches</option>
-                        <option value="Modern">Modern</option>
-                        <option value="Abstract">Abstract</option>
-                        <option value="Realism">Realism</option>
-                        <option value="Surrealism">Surrealism</option>
+                        <option value="Sketches" className="bg-gray-700">Sketches</option>
+                        <option value="Modern" className="bg-gray-700">Modern</option>
+                        <option value="Abstract" className="bg-gray-700">Abstract</option>
+                        <option value="Realism" className="bg-gray-700">Realism</option>
+                        <option value="Surrealism"className="bg-gray-700">Surrealism</option>
                       </select>
                     </div>
                   )}

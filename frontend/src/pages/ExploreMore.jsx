@@ -62,14 +62,14 @@ const ExploreMore = () => {
     if (token) {
       // Example: decode token or call backend to get username
       // Here, assuming backend provides a user info endpoint
-      fetch("http://localhost:5000/api/seller/profile", {
+      fetch("http://localhost:5000/api/auth/profile", {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => {
           if (!res.ok) throw new Error("Unauthorized");
           return res.json();
         })
-        .then((userData) => setUserName(userData.name))
+        .then((userData) => setUserName(userData.fullName))
         .catch(() => {
           localStorage.removeItem("token");
           setUserName(null);
@@ -103,7 +103,7 @@ const ExploreMore = () => {
       navigate("/signin");
       return;
     }
-    alert(`Buying "${selectedArt.name}" - feature coming soon!`);
+    navigate(`/purchase/${selectedArt._id}`);
   };
 
   return (

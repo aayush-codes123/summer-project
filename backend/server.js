@@ -5,10 +5,11 @@ const connectDB = require("./config/db");
 const artworkRoutes = require('./routes/artworkRoutes.js');
 const path = require('path')
 const sellerRoutes = require('./routes/sellerRoutes');
+const authMiddleware = require('./middleware/authMiddleware');
+const authController = require('./controllers/authController');
+const createAdminUser = require('./utils/createAdminUser');
 
 dotenv.config();
-connectDB();
-
 
 const app = express();
 app.use(
@@ -26,6 +27,20 @@ app.use("/api/auth", require("./routes/authRoutes"));
 app.use('/api/seller/artworks', artworkRoutes);
 app.use('/api/artworks', artworkRoutes);
 app.use('/api/seller', sellerRoutes);
+app.use('/api/orders', require('./routes/orderRoutes'));
+app.use('/api/payment', require('./routes/paymentRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Start server after database connection and admin user creation
+(async () => {
+  try {
+    await connectDB();
+    await createAdminUser();
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+})();

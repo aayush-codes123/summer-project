@@ -28,8 +28,10 @@ export const SignIn = () => {
         localStorage.setItem("token", data.token); // Optional: store JWT
         if (data.user.role === "seller") {
           navigate("/sellerdashboard");
+        } else if (data.user.role === "admin") {
+          navigate("/admindashboard");
         } else {
-          navigate("/buyer-dashboard");
+          navigate("/explore");
         }
       } else {
         setError(data.message || "Login failed");
@@ -57,7 +59,7 @@ export const SignIn = () => {
       href="/"
       className="text-white text-2xl font-bold hover:text-purple-300 transition"
     >
-      🎨 ArtVerse
+      🎨 Musemarket
     </a>
     <a
       href="/"

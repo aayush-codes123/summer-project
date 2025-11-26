@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import background2 from "../images/background2.jpg";
 
 const MyArtworks = () => {
   const navigate = useNavigate();
@@ -9,7 +8,6 @@ const MyArtworks = () => {
   const [editMode, setEditMode] = useState(null);
   const [editForm, setEditForm] = useState({});
 
-  // Get token from localStorage
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -25,7 +23,6 @@ const MyArtworks = () => {
         },
       });
       const data = await res.json();
-      console.log("Fetched artworks:", data);
       if (res.ok) setArtworks(data);
       else if (res.status === 401) navigate("/signin");
     } catch (err) {
@@ -45,6 +42,7 @@ const MyArtworks = () => {
       });
       if (res.ok) {
         setArtworks(artworks.filter((art) => art._id !== id));
+        alert("Artwork deleted successfully!");
       } else if (res.status === 401) {
         navigate("/signin");
       }
@@ -78,6 +76,7 @@ const MyArtworks = () => {
       if (res.ok) {
         fetchArtworks();
         setEditMode(null);
+        alert("Artwork updated successfully!");
       } else if (res.status === 401) {
         navigate("/signin");
       } else {
@@ -88,146 +87,163 @@ const MyArtworks = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/signin");
-  };
-
   return (
-    <div
-      className="relative min-h-screen w-full bg-cover bg-center bg-fixed flex flex-col items-center justify-start px-4"
-      style={{
-        backgroundImage: `url(${background2})`,
-      }}
+    <motion.div
+      className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl border border-white/30 shadow-2xl max-w-6xl mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
     >
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-black/60 z-0 pointer-events-none"></div>
+      <h2 className="text-white text-3xl font-bold mb-6 text-center">
+        My Artworks
+      </h2>
 
-      {/* Logout Button */}
-      <div className="absolute top-5 right-5 z-20">
-        <button
-          onClick={handleLogout}
-          className="bg-white/20 text-white px-4 py-2 rounded-lg hover:bg-red-500/60 transition"
-        >
-          Logout
-        </button>
-      </div>
-
-      {/* Main Content */}
-      <motion.div
-        className="relative z-10 bg-white/10 backdrop-blur-lg p-6 rounded-3xl border border-white/30 shadow-2xl max-w-5xl w-full mx-auto mt-28 mb-10"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
-      >
-        <h2 className="text-white text-3xl font-bold mb-6 text-center">
-          My Artworks
-        </h2>
-
-        {artworks.length === 0 ? (
-          <p className="text-white text-center">No artworks uploaded yet.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {artworks.map((art) => (
-              <motion.div
-                key={art._id}
-                className="bg-white/10 rounded-xl p-4 border border-white/20 shadow-lg backdrop-blur-md"
-                whileHover={{ scale: 1.02 }}
-              >
-                {editMode === art._id ? (
-                  <form onSubmit={handleEditSubmit} className="space-y-3">
+      {artworks.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-white/70 text-lg">No artworks uploaded yet.</p>
+          <p className="text-white/50 text-sm mt-2">Start by uploading your first artwork!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {artworks.map((art) => (
+            <motion.div
+              key={art._id}
+              className="bg-white/10 rounded-xl overflow-hidden border border-white/20 shadow-lg backdrop-blur-md"
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+            >
+              {editMode === art._id ? (
+                <form onSubmit={handleEditSubmit} className="p-4 space-y-3">
+                  <div>
+                    <label className="block text-white/80 text-sm mb-1">Title</label>
                     <input
                       type="text"
                       name="title"
                       value={editForm.title}
                       onChange={handleEditChange}
-                      className="w-full p-2 rounded bg-white/20 text-white"
+                      className="w-full p-2 rounded-lg bg-white/20 text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-purple-500"
                       required
                     />
+                  </div>
+                  <div>
+                    <label className="block text-white/80 text-sm mb-1">Description</label>
                     <textarea
                       name="description"
                       value={editForm.description}
                       onChange={handleEditChange}
-                      className="w-full p-2 rounded bg-white/20 text-white"
+                      rows={3}
+                      className="w-full p-2 rounded-lg bg-white/20 text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-purple-500 resize-none"
                       required
                     />
-                    <input
-                      type="number"
-                      name="price"
-                      value={editForm.price}
-                      onChange={handleEditChange}
-                      className="w-full p-2 rounded bg-white/20 text-white"
-                      required
-                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-white/80 text-sm mb-1">Price (Rs.)</label>
+                      <input
+                        type="number"
+                        name="price"
+                        value={editForm.price}
+                        onChange={handleEditChange}
+                        className="w-full p-2 rounded-lg bg-white/20 text-white outline-none focus:ring-2 focus:ring-purple-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-white/80 text-sm mb-1">Status</label>
+                      <select
+                        name="status"
+                        value={editForm.status}
+                        onChange={handleEditChange}
+                        className="w-full p-2 rounded-lg bg-white/20 text-white outline-none focus:ring-2 focus:ring-purple-500"
+                      >
+                        <option className="bg-gray-800" value="Available">
+                          Available
+                        </option>
+                        <option className="bg-gray-800" value="Sold">
+                          Sold
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-white/80 text-sm mb-1">Label</label>
                     <input
                       type="text"
                       name="label"
                       value={editForm.label}
                       onChange={handleEditChange}
-                      className="w-full p-2 rounded bg-white/20 text-white"
+                      className="w-full p-2 rounded-lg bg-white/20 text-white outline-none focus:ring-2 focus:ring-purple-500"
                     />
-                    <select
-                      name="status"
-                      value={editForm.status}
-                      onChange={handleEditChange}
-                      className="w-full p-2 rounded bg-white/20 text-white"
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      type="submit"
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition"
                     >
-                      <option className="bg-gray-800" value="Available">
-                        Available
-                      </option>
-                      <option className="bg-gray-800" value="Sold">
-                        Sold
-                      </option>
-                    </select>
-                    <div className="flex justify-between mt-2">
-                      <button
-                        type="submit"
-                        className="bg-green-500/70 text-white px-3 py-1 rounded"
-                      >
-                        Save
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setEditMode(null)}
-                        className="bg-gray-500/60 text-white px-3 py-1 rounded"
-                      >
-                        Cancel
-                      </button>
+                      Save
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      type="button"
+                      onClick={() => setEditMode(null)}
+                      className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition"
+                    >
+                      Cancel
+                    </motion.button>
+                  </div>
+                </form>
+              ) : (
+                <>
+                  <img
+                    src={`http://localhost:5000${art.imageUrl}`}
+                    alt={art.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-4">
+                    <h3 className="text-white font-bold text-lg mb-1">{art.title}</h3>
+                    <p className="text-white/70 text-sm mb-2 line-clamp-2">{art.description}</p>
+                    <div className="flex justify-between items-center mb-3">
+                      <p className="text-purple-300 font-semibold text-lg">Rs. {art.price}</p>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        art.status === 'Available'
+                          ? 'bg-green-500/30 text-green-200'
+                          : 'bg-red-500/30 text-red-200'
+                      }`}>
+                        {art.status}
+                      </span>
                     </div>
-                  </form>
-                ) : (
-                  <>
-                    <img
-                      src={`http://localhost:5000${art.imageUrl}`}
-                      alt={art.title}
-                      className="w-full h-48 object-cover rounded-md mb-2"
-                    />
-                    <h3 className="text-white font-semibold">{art.title}</h3>
-                    <p className="text-white/80 text-sm">{art.description}</p>
-                    <p className="text-white/70">Rs. {art.price}</p>
-                    <p className="text-white/60 text-sm">Status: {art.status}</p>
-                    <div className="flex gap-2 mt-3">
-                      <button
+                    {art.label && (
+                      <p className="text-white/50 text-xs mb-3">Category: {art.label}</p>
+                    )}
+                    <div className="flex gap-2">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => handleEditToggle(art)}
-                        className="bg-blue-500/70 text-white px-3 py-1 rounded"
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition"
                       >
                         Edit
-                      </button>
-                      <button
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => handleDelete(art._id)}
-                        className="bg-red-500/70 text-white px-3 py-1 rounded"
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition"
                       >
                         Delete
-                      </button>
+                      </motion.button>
                     </div>
-                  </>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </motion.div>
-    </div>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </motion.div>
   );
 };
 

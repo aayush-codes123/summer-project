@@ -24,4 +24,5 @@ router.put('/:id', auth, updateArtwork);
 
 
 router.get('/explore', artworkController.getAllArtworksPublic);
+router.get('/:id', artworkController.getArtworkById);
 module.exports = router;

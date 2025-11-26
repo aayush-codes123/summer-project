@@ -67,4 +67,14 @@ const getAllArtworksPublic = async (req, res) => {
   }
 };
 
-module.exports = { createArtwork, getMyArtworks, deleteArtwork, updateArtwork, getAllArtworksPublic };
+const getArtworkById = async (req, res) => {
+  try {
+    const artwork = await Artwork.findById(req.params.id).populate('seller', 'fullName username');
+    if (!artwork) return res.status(404).json({ message: 'Artwork not found' });
+    res.json(artwork);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = { createArtwork, getMyArtworks, deleteArtwork, updateArtwork, getAllArtworksPublic, getArtworkById };

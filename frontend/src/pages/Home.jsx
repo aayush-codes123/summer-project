@@ -112,7 +112,7 @@ const Home = () => {
           ref={loaderRef}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black text-white text-3xl font-bold"
         >
-          Loading Artistry...
+          Loading Musemarket...
         </div>
       )}
 
@@ -124,7 +124,7 @@ const Home = () => {
         }}
       >
         <nav className="flex items-center justify-between px-6 py-4 bg-black/40 backdrop-blur-sm z-50 text-white shadow-md">
-          <div className="text-3xl font-bold tracking-wide">🎨 Artistry</div>
+          <div className="text-3xl font-bold tracking-wide">🎨 Musemarket</div>
           <div className="space-x-4">
             <Link
               to="/signin"
@@ -296,7 +296,7 @@ const Home = () => {
         </section>
 
         <footer className="bg-black text-white text-center p-6">
-          &copy; {new Date().getFullYear()} Artistry. All rights reserved.
+          &copy; {new Date().getFullYear()} Musemarket. All rights reserved.
         </footer>
       </div>
     </div>
