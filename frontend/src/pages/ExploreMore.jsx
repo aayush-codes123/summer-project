@@ -126,7 +126,14 @@ const ExploreMore = () => {
               loading="lazy"
             />
             <div className="p-4">
-              <h3 className="text-xl font-semibold">{art.title}</h3>
+              <div className="flex justify-between items-start">
+                <h3 className="text-xl font-semibold">{art.title}</h3>
+                {art.status === "Sold" && (
+                  <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    Sold
+                  </span>
+                )}
+              </div>
               <p className="text-gray-600 mt-1">{art.description}</p>
             </div>
           </div>
@@ -157,7 +164,14 @@ const ExploreMore = () => {
               className="w-full h-64 object-cover rounded-t-xl"
             />
             <div className="p-6">
-              <h2 className="text-3xl font-bold mb-2">{selectedArt.title}</h2>
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-3xl font-bold">{selectedArt.title}</h2>
+                {selectedArt.status === "Sold" && (
+                  <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                    SOLD
+                  </span>
+                )}
+              </div>
               <p className="text-gray-700 mb-4">{selectedArt.description}</p>
               <p className="text-lg font-semibold mb-2">
                 Price: <span className="text-indigo-600">Rs. {selectedArt.price}</span>
@@ -165,12 +179,21 @@ const ExploreMore = () => {
               <p className="text-gray-800">
                 Artist: <span className="font-medium">{selectedArt.sellerName || "Unknown"}</span>
               </p>
-              <button
-                onClick={handleBuy}
-                className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
-              >
-                Buy
-              </button>
+              {selectedArt.status === "Sold" ? (
+                <button
+                  disabled
+                  className="mt-4 bg-gray-400 text-white px-4 py-2 rounded cursor-not-allowed"
+                >
+                  Sold Out
+                </button>
+              ) : (
+                <button
+                  onClick={handleBuy}
+                  className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
+                >
+                  Buy
+                </button>
+              )}
             </div>
           </div>
         </div>

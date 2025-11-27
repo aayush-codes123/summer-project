@@ -180,7 +180,14 @@ const Home = () => {
                     className="w-full h-64 object-cover"
                   />
                   <div className="p-4">
-                    <h3 className="text-xl font-bold mb-2">{art.title}</h3>
+                    <div className="flex justify-between items-start">
+                      <h3 className="text-xl font-bold mb-2">{art.title}</h3>
+                      {art.status === "Sold" && (
+                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                          Sold
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-gray-600 truncate">
                       {art.description}
                     </p>

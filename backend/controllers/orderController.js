@@ -26,6 +26,9 @@ exports.placeOrder = async (req, res) => {
     // Fetch artwork details for email
     const artwork = await Artwork.findById(artworkId);
 
+    // Update artwork status to Sold
+    await Artwork.findByIdAndUpdate(artworkId, { status: "Sold" });
+
     // Send Confirmation Email
     const buyerEmail = req.user.email; // Assuming user email is in req.user
     await sendOrderConfirmation(buyerEmail, {

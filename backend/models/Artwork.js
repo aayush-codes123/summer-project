@@ -5,7 +5,7 @@ const artworkSchema = new mongoose.Schema({
   description: String,
   price: { type: Number, required: true },
   label: String,
-  status: { type: String, enum: ['Available', 'Sold'], default: 'available' },
+  status: { type: String, enum: ['Available', 'Sold'], default: 'Available' },
   imageUrl: { type: String, required: true },
   seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 }, {
