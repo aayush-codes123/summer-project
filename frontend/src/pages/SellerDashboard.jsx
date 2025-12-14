@@ -50,7 +50,7 @@ const SellerDashboard = () => {
       {/* Navbar */}
       <nav className="flex justify-between items-center px-6 py-4 bg-black/60 backdrop-blur-md shadow-lg relative z-10">
         <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold">🎨 ArtVerse - Seller Dashboard</h1>
+          <h1 className="text-2xl font-bold">🎨 Musemarket - Seller Dashboard</h1>
           {sellerName && (
             <span className="text-white/80 text-sm">Welcome, {sellerName}!</span>
           )}

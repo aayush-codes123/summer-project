@@ -1,7 +1,6 @@
 const nodemailer = require('nodemailer');
 
-// Create a transporter
-// NOTE: Configure EMAIL_USER and EMAIL_PASS in .env to enable email notifications
+
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -18,9 +17,9 @@ const sendOrderConfirmation = async (to, orderDetails) => {
   }
 
   const mailOptions = {
-    from: `"ArtStore" <${process.env.EMAIL_USER}>`,
+    from: `"MuseMarket" <${process.env.EMAIL_USER}>`,
     to: to,
-    subject: 'Order Confirmation - ArtStore',
+    subject: 'Order Confirmation - MuseMarket',
     html: `
       <div style="font-family: Arial, sans-serif; color: #333;">
         <h1>Thank you for your order!</h1>
@@ -37,7 +36,7 @@ const sendOrderConfirmation = async (to, orderDetails) => {
         <p>We will notify you when your item is shipped to:</p>
         <p>${orderDetails.shippingAddress}</p>
 
-        <p>Best regards,<br>The ArtStore Team</p>
+        <p>Best regards,<br>The MuseMarket Team</p>
       </div>
     `
   };
@@ -47,7 +46,7 @@ const sendOrderConfirmation = async (to, orderDetails) => {
     console.log('Order confirmation email sent to:', to);
   } catch (error) {
     console.error('Error sending email:', error.message);
-    // Don't throw error - email is optional, order should still succeed
+
   }
 };
 

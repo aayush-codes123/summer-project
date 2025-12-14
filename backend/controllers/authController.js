@@ -16,6 +16,35 @@ exports.signup = async (req, res) => {
   } = req.body;
 
   try {
+    // Validation
+    if (role === "buyer") {
+      const ageValue = parseInt(age);
+      if (isNaN(ageValue) || ageValue < 18 || ageValue > 50) {
+        return res.status(400).json({ message: "Age must be between 18 and 50 to sign up" });
+      }
+    }
+
+    const phoneRegex = /^98\d{8}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      return res.status(400).json({ message: "Phone number should start from 98 and should be 10 digit only" });
+    }
+
+    const usernameRegex = /^[a-zA-Z]+$/;
+    if (!usernameRegex.test(username)) {
+      return res.status(400).json({ message: "Username should be text only and should be unique for each user and no spaces or numners" });
+    }
+
+    // Check for existing user
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return res.status(400).json({ message: "Username should be text only and should be unique for each user and no spaces or numners" });
+    }
+
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({

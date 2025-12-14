@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 const Navbar = ({ userName }) => (
   <nav className="flex items-center justify-between px-6 py-4 bg-black bg-opacity-80 text-white shadow-md fixed w-full top-0 z-50">
     <div className="flex items-center space-x-4">
-      <div className="text-3xl font-bold tracking-wide">🎨 Artistry</div>
+      <div className="text-3xl font-bold tracking-wide">Musemarket</div>
       {userName && (
         <div className="text-lg font-semibold ml-6">Welcome, {userName}</div>
       )}

@@ -22,13 +22,18 @@ export const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (parseInt(formData.age) < 18) {
-      alert("You must be 18 or older to sign up.");
+    if (parseInt(formData.age) < 18 || parseInt(formData.age) > 50) {
+      alert("You must be between 18 and 50 years old to sign up.");
       return;
     }
 
     if (!/^98\d{8}$/.test(formData.phone)) {
-      alert("Phone number must start with 98 and be 10 digits long.");
+      alert("Phone number should start from 98 and should be 10 digit only");
+      return;
+    }
+
+    if (!/^[a-zA-Z]+$/.test(formData.username)) {
+      alert("Username should be text only and should be unique for each user and no spaces or numners");
       return;
     }
 
@@ -196,7 +201,6 @@ export const SignUp = () => {
                     <input
                       type="text"
                       name="phone"
-                      pattern="98\d{8}"
                       required
                       onChange={handleChange}
                       className="w-full p-3 mt-1 rounded-xl bg-white/20 text-white placeholder-white/50 outline-none focus:ring-2 focus:ring-white/40 transition"
